@@ -525,14 +525,14 @@ static int init_function(void) {
  * - Ensure synchronization, if needed.
  */
 static void exit_function(void) {
-	spin_lock(&calltable_lock);
+	spin_lock(&my_table_lock);
 	set_addr_rw((unsigned long)sys_call_table);
 
 	sys_call_table[MY_CUSTOM_SYSCALL] = orig_custom_syscall;
 	sys_call_table[__NR_exit_group] = orig_exit_group;
 
 	set_addr_ro((unsigned long)sys_call_table);
-	spin_unlock(&calltable_lock);
+	spin_unlock(&my_table_lock);
 
 	int i;
 	for(i = 0; i < NR_syscalls; i++){
