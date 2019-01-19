@@ -279,22 +279,20 @@ asmlinkage long my_exit_group(struct pt_regs reg)
  */
 asmlinkage long interceptor(struct pt_regs reg) {
 
-  int sysc = reg.eax;
-
-	struct mytable syscall = table[sysc];
+  int sysc = reg.ax;
 
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
        // Not monotored, just log message
-			 log_message(current->pid, sysc, reg.ebx, reg.ecx, reg.edx, reg.esi, reg.edi, reg.ebp);
+			 log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 		} else if (syscall.monitored == 1) {
       // May be monitored.
 			if (check_pid_monitored(sysc, current->pid)) {
-				log_message(current->pid, sysc, reg.ebx, reg.ecx, reg.edx, reg.esi, reg.edi, reg.ebp);
+				log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 			}
 		} else {
       // all are monitored
-			log_message(current->pid, sysc, reg.ebx, reg.ecx, reg.edx, reg.esi, reg.edi, reg.ebp);
+			log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 		}
 	} else {
 		// Not Intercepted
@@ -493,8 +491,8 @@ static int init_function(void) {
 	orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
 	orig_exit_group = sys_call_table[__NR_exit_group];
 
-	spin_lock_init(&calltable_lock);
-	spin_lock_init(&pidlist_lock);
+	spin_lock_init(&my_table_lock);
+	spin_lock_init(&sys_call_table_lock);
 
 	spin_lock(&my_table_lock);
 	set_addr_rw((unsigned long)sys_call_table);
@@ -536,7 +534,7 @@ static void exit_function(void) {
 
 	int i;
 	for(i = 0; i < NR_syscalls; i++){
-		destroy_list(i)
+		destroy_list(i);
 	}
 
 }
