@@ -254,8 +254,8 @@ asmlinkage long (*orig_exit_group)(struct pt_regs reg);
  */
 asmlinkage long my_exit_group(struct pt_regs reg)
 {
-    del_pid(current->pid)
-		orig_exit_group(regs)
+    del_pid(current->pid);
+		orig_exit_group(regs);
 }
 //----------------------------------------------------------------
 
@@ -279,9 +279,9 @@ asmlinkage long my_exit_group(struct pt_regs reg)
  */
 asmlinkage long interceptor(struct pt_regs reg) {
 
-  int sysc = reg.eax
+  int sysc = reg.eax;
 
-	struct mytable syscall = table[sysc]
+	struct mytable syscall = table[sysc];
 
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
@@ -294,14 +294,14 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			}
 		} else {
       // all are monitored
-			log_message(current->pid, sysc, reg.ebx, reg.ecx, reg.edx, reg.esi, reg.edi, reg.ebp)
+			log_message(current->pid, sysc, reg.ebx, reg.ecx, reg.edx, reg.esi, reg.edi, reg.ebp);
 		}
 	} else {
 		// Not Intercepted
 	}
 
   // call the original system call
-	table[sysc].f(reg)
+	table[sysc].f(reg);
 
 	return 0; // Just a placeholder, so it compiles with no warnings!
 }
@@ -361,51 +361,51 @@ asmlinkage long interceptor(struct pt_regs reg) {
 asmlinkage long my_syscall(int cmd, int syscall, int pid) {
     if (cmd == REQUEST_SYSCALL_INTERCEPT) {
        if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
-				 return -EINVAL
+				 return -EINVAL;
 			 }
 
 			 if (current_uid() != 0) {
-				 return -EPERM
+				 return -EPERM;
 			 }
 
 			 if (table[syscall].intercepted == 1) {
-				 return -EBUSY
+				 return -EBUSY;
 			 }
 
 			 table[syscall].intercepted = 1;
 
-			 table[syscall].f = sys_call_table[syscall]
+			 table[syscall].f = sys_call_table[syscall];
 
-			 spin_lock(&my_table_lock)
-			 set_addr_rw((unsigned long)sys_call_table)
-			 sys_call_table[syscall] = &interceptor
-       set_addr_ro((unsigned long)sys_call_table)
-			 spin_unlock(&my_table_lock)
+			 spin_lock(&my_table_lock);
+			 set_addr_rw((unsigned long)sys_call_table);
+			 sys_call_table[syscall] = &interceptor;
+       set_addr_ro((unsigned long)sys_call_table);
+			 spin_unlock(&my_table_lock);
 
 		} else if (cmd == REQUEST_SYSCALL_RELEASE) {
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
-				return -EINVAL
+				return -EINVAL;
 			}
 
 			if (current_uid() != 0) {
-				return -EPERM
+				return -EPERM;
 			}
 
 			if (table[syscall].intercepted == 0) {
-				return -EINVAL
+				return -EINVAL;
 			}
 
-			destroy_list(syscall)
+			destroy_list(syscall);
 
-			spin_lock(&my_table_lock)
-			set_addr_rw((unsigned long)sys_call_table)
-			sys_call_table[syscall] = table[syscall].f
-			set_addr_ro((unsigned long)sys_call_table)
-			spin_unlock(&my_table_lock)
+			spin_lock(&my_table_lock);
+			set_addr_rw((unsigned long)sys_call_table);
+			sys_call_table[syscall] = table[syscall].f;
+			set_addr_ro((unsigned long)sys_call_table);
+			spin_unlock(&my_table_lock);
 
 		} else if (cmd == REQUEST_START_MONITORING) {
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
-				return -EINVAL
+				return -EINVAL;
 			}
 
 			if (pid < 0) {
@@ -423,19 +423,19 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			if (check_pid_monitored(syscall, pid) == 1) {
-				 return -EBUSY
+				 return -EBUSY;
 			}
 
-			spin_lock(&sys_call_table_lock)
+			spin_lock(&sys_call_table_lock);
 			if (add_pid_sysc(pid, syscall) != 0){
 				spin_unlock(&sys_call_table_lock);
 				return -ENOMEM;
 			}
-			spin_unlock(&sys_call_table_lock)
+			spin_unlock(&sys_call_table_lock);
 
 		} else {
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
-				return -EINVAL
+				return -EINVAL;
 			}
 
 			if (pid < 0) {
@@ -453,15 +453,15 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			if (check_pid_monitored(syscall, pid) == 0) {
-				 return -EINVAL
+				 return -EINVAL;
 			}
 
-			spin_lock(&sys_call_table_lock)
+			spin_lock(&sys_call_table_lock);
 			if (del_pid_sysc(pid, syscall) != 0){
 				spin_unlock(&sys_call_table_lock);
 				return -EINVAL;
 			}
-			spin_unlock(&sys_call_table_lock)
+			spin_unlock(&sys_call_table_lock);
 
 		}
 
