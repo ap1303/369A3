@@ -255,7 +255,7 @@ asmlinkage long (*orig_exit_group)(struct pt_regs reg);
 asmlinkage long my_exit_group(struct pt_regs reg)
 {
     del_pid(current->pid);
-		orig_exit_group(regs);
+		orig_exit_group(reg);
 }
 //----------------------------------------------------------------
 
