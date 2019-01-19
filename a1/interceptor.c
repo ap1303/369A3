@@ -281,6 +281,8 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
   int sysc = reg.ax;
 
+	struct mytable syscall = table[sysc];
+
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
        // Not monotored, just log message
@@ -292,7 +294,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 			}
 		} else {
       // all are monitored
-			log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+			log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.edi, reg.ebp);
 		}
 	} else {
 		// Not Intercepted
