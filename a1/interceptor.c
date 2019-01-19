@@ -281,7 +281,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 
   int sysc = reg.ax;
 
-	struct mytable syscall = table[sysc];
+	mytable syscall = table[sysc];
 
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
