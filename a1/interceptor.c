@@ -516,6 +516,7 @@ long (*orig_custom_syscall)(void);
  * - Ensure synchronization as needed.
  */
 static int init_function(void) {
+	int i;
 	orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
 	orig_exit_group = sys_call_table[__NR_exit_group];
 
@@ -529,8 +530,7 @@ static int init_function(void) {
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&my_table_lock);
 
-  int i = 0;
-	for( i < NR_syscalls; i++){
+	for(i = 0; i < NR_syscalls; i++){
 		INIT_LIST_HEAD(&(table[i].my_list));
 		table[i].intercepted = 0;
 		table[i].monitored = 0;
@@ -551,6 +551,8 @@ static int init_function(void) {
  * - Ensure synchronization, if needed.
  */
 static void exit_function(void) {
+	int i;
+
 	spin_lock(&my_table_lock);
 	set_addr_rw((unsigned long)sys_call_table);
 
@@ -560,8 +562,8 @@ static void exit_function(void) {
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&my_table_lock);
 
-  int i = 0;
-	for(; i < NR_syscalls; i++){
+
+	for(i = 0; i < NR_syscalls; i++){
 		destroy_list(i);
 	}
 
