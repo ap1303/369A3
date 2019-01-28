@@ -286,32 +286,15 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
        // Not monotored, just log message
-			 long unsigned b = reg.bx;
-			 long unsigned c = reg.cx;
-			 long unsigned d = reg.dx;
-			 long unsigned s = reg.si;
-			 long unsigned d = reg.di;
-			 long unsigned bp = reg.bp;
-			 log_message(current->pid, sysc, b, c, d, s, d, bp);
+			 log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 		} else if (syscall.monitored == 1) {
       // May be monitored.
 			if (check_pid_monitored(sysc, current->pid)) {
-				long unsigned b = reg.bx;
- 			 long unsigned c = reg.cx;
- 			 long unsigned d = reg.dx;
- 			 long unsigned s = reg.si;
- 			 long unsigned d = reg.di;
- 			 long unsigned bp = reg.bp;
- 			 log_message(current->pid, sysc, b, c, d, s, d, bp);
+				log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
+			}
 		} else {
       // all are monitored
-			long unsigned b = reg.bx;
-			long unsigned c = reg.cx;
-			long unsigned d = reg.dx;
-			long unsigned s = reg.si;
-			long unsigned d = reg.di;
-			long unsigned bp = reg.bp;
-			log_message(current->pid, sysc, b, c, d, s, d, bp);
+			log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 		}
 	} else {
 		// Not Intercepted
