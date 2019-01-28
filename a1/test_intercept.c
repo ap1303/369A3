@@ -21,13 +21,13 @@ int vsyscall_arg(int sno, int n, ...) {
 	va_list va;
 	long args[6];
 	int i, ret;
-	
+
 	va_start(va, n);
 	for(i = 0; i < n; i++) {
 		args[i] = va_arg(va, long);
 	}
 	va_end(va);
-	
+
 	ret = syscall(sno, args[0], args[1], args[2]);
 	printf(" %d is ret\n");
 	if(ret) ret = -errno;
@@ -68,7 +68,7 @@ int do_release(int syscall, int status) {
 }
 
 
-/** 
+/**
  * Run the tester as a non-root user, and basically run do_nonroot
  */
 void do_as_guest(const char *str, int args1, int args2) {
@@ -110,8 +110,8 @@ void test_syscall(int syscall) {
 int main(int argc, char **argv) {
 
 	srand(time(NULL));
-	printf("\n errno is %d\n", errno);
-	if (argc>1 && strcmp(argv[1], "intercept") == 0) 
+	printf("\n errno is %d\n",  errno);
+	if (argc>1 && strcmp(argv[1], "intercept") == 0)
 		return do_intercept(atoi(argv[2]), atoi(argv[3]));
 
 	if (argc>1 && strcmp(argv[1], "release") == 0)
@@ -133,11 +133,10 @@ int main(int argc, char **argv) {
 
 	test_syscall(SYS_open);
 	/* The above line of code tests SYS_open.
-	   Feel free to add more tests here for other system calls, 
+	   Feel free to add more tests here for other system calls,
 	   once you get everything to work; check Linux documentation
 	   for other syscall number definitions.  */
 
 	test("rmmod interceptor.ko %s", "", system("rmmod interceptor") == 0);
 	return 0;
 }
-

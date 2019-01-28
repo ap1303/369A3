@@ -286,24 +286,20 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
        // Not monotored, just log message
-			 log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
+			 log_message(current->pid, sysc, (unsigned long) reg.bx, (unsigned long)reg.cx, (unsigned long)reg.dx, (unsigned long)reg.si, (unsigned long)reg.di, (unsigned long)reg.bp);
 		} else if (syscall.monitored == 1) {
       // May be monitored.
 			if (check_pid_monitored(sysc, current->pid)) {
-				log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
+				log_message(current->pid, sysc, (unsigned long) reg.bx, (unsigned long)reg.cx, (unsigned long)reg.dx, (unsigned long)reg.si, (unsigned long)reg.di, (unsigned long)reg.bp);
 			}
 		} else {
       // all are monitored
-			log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 		}
 	} else {
 		// Not Intercepted
 	}
 
-  // call the original system call
-	table[sysc].f(reg);
-
-	return 0; // Just a placeholder, so it compiles with no warnings!
+	return table[syscall].f(regs); // Just a placeholder, so it compiles with no warnings!
 }
 
 /**
@@ -407,6 +403,8 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&sys_call_table_lock);
 			spin_unlock(&my_table_lock);
+
+			table[syscall].intercepted = 0;
 
 		} else if (cmd == REQUEST_START_MONITORING) {
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
