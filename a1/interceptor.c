@@ -286,15 +286,15 @@ asmlinkage long interceptor(struct pt_regs reg) {
 	if (syscall.intercepted == 1) {
 		if (syscall.monitored == 0) {
        // Not monotored, just log message
-			 log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+			 log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 		} else if (syscall.monitored == 1) {
       // May be monitored.
 			if (check_pid_monitored(sysc, current->pid)) {
-				log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+				log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 			}
 		} else {
       // all are monitored
-			log_message(current->pid, sysc, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+			log_message(current->pid, sysc, (long unsigned int) reg.bx, (long unsigned int)reg.cx, (long unsigned int)reg.dx, (long unsigned int)reg.si, (long unsigned int)reg.di, (long unsigned int)reg.bp);
 		}
 	} else {
 		// Not Intercepted
@@ -405,7 +405,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			set_addr_rw((unsigned long)sys_call_table);
 			sys_call_table[syscall] = table[syscall].f;
 			set_addr_ro((unsigned long)sys_call_table);
-			spin_unlock(&sys_table_lock);
+			spin_unlock(&sys_call_table_lock);
 			spin_unlock(&my_table_lock);
 
 		} else if (cmd == REQUEST_START_MONITORING) {
@@ -529,8 +529,7 @@ static int init_function(void) {
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&my_table_lock);
 
-	int i;
-	for(i = 0; i < NR_syscalls; i++){
+	for(int i = 0; i < NR_syscalls; i++){
 		INIT_LIST_HEAD(&(table[i].my_list));
 		table[i].intercepted = 0;
 		table[i].monitored = 0;
@@ -560,8 +559,7 @@ static void exit_function(void) {
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&my_table_lock);
 
-	int i;
-	for(i = 0; i < NR_syscalls; i++){
+	for(int i = 0; i < NR_syscalls; i++){
 		destroy_list(i);
 	}
 
