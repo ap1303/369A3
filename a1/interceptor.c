@@ -356,6 +356,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
  */
 asmlinkage long my_syscall(int cmd, int syscall, int pid) {
     if (cmd == REQUEST_SYSCALL_INTERCEPT) {
+			 // vhrvk error conditions
        if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
 				 return -EINVAL;
 			 }
@@ -370,6 +371,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				 return -EBUSY;
 			 }
 
+       // actual intercept
 			 table[syscall].intercepted = 1;
 			 table[syscall].f = sys_call_table[syscall];
 			 spin_unlock(&my_table_lock);
@@ -381,6 +383,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			 spin_unlock(&sys_call_table_lock);
 
 		} else if (cmd == REQUEST_SYSCALL_RELEASE) {
+			// check error conditions
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
 				return -EINVAL;
 			}
@@ -395,6 +398,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				return -EINVAL;
 			}
 
+      // actual release
 			destroy_list(syscall);
 
 			spin_lock(&sys_call_table_lock);
@@ -407,6 +411,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			table[syscall].intercepted = 0;
 
 		} else if (cmd == REQUEST_START_MONITORING) {
+			// check erro conditions
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
 				return -EINVAL;
 			}
@@ -425,7 +430,9 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			  }
 			}
 
+      // start monitoring
       if (pid != 0) {
+				// for a specific syscall
 				if (check_pid_monitored(syscall, pid) == 1) {
 					 return -EBUSY;
 				}
@@ -441,6 +448,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 				table[syscall].monitored = 1;
 			} else {
+				// for all syscall
 				spin_lock(&my_table_lock);
 				table[syscall].monitored = 2;
 				add_pid_sysc(pid, syscall);
@@ -448,6 +456,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 		} else {
+			// error checking
 			if (syscall < 0 || syscall > NR_syscalls - 1 || syscall == MY_CUSTOM_SYSCALL) {
 				return -EINVAL;
 			}
@@ -466,7 +475,9 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			  }
 			}
 
+      // start monitoring
       if (pid != 0) {
+				// for a specific pid.
 				if (check_pid_monitored(syscall, pid) == 0) {
 					 return -EINVAL;
 				}
@@ -480,6 +491,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 				table[syscall].monitored = 1;
 			} else {
+				// for all syscalls
 				spin_lock(&my_table_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 0;
