@@ -299,7 +299,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		// Not Intercepted
 	}
 
-	return table[syscall].f(regs); // Just a placeholder, so it compiles with no warnings!
+	return table[sysc].f(regs); // Just a placeholder, so it compiles with no warnings!
 }
 
 /**
@@ -442,8 +442,8 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				table[syscall].monitored = 1;
 			} else {
 				spin_lock(&my_table_lock);
-				destroy_list(syscall);
 				table[syscall].monitored = 2;
+				add_pid_sysc(pid, syscall);
 				spin_unlock(&my_table_lock);
 			}
 
