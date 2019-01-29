@@ -299,7 +299,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		// Not Intercepted
 	}
 
-	return table[sysc].f(regs); // Just a placeholder, so it compiles with no warnings!
+	return table[sysc].f(reg); // Just a placeholder, so it compiles with no warnings!
 }
 
 /**
