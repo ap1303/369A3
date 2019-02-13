@@ -38,8 +38,7 @@ int main(int argc, char** argv)
 	}
 
 	if (sim != NULL) {
-    int i;
-		for (i = 0; i < experimentCount; i++) {
+		for (int i = 0; i < experimentCount; i++) {
 			sim(carsPerExperiment);
 		}
 		printf("Simulation complete!\n");
