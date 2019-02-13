@@ -12,21 +12,21 @@
 
 int main(int argc, char** argv)
 {
-    
+
 	if (argc != 4) {
 		fprintf(stderr, "Usage: %s [stop|light] number_of_experiments cars_per_experiment\n", argv[0]);
 		exit(-1);
 	}
-	
+
 	// Extract arguments.
 	char* pEnd;
 	const char* simulationName = argv[1];
 	int experimentCount = strtol(argv[2], &pEnd, 10);
-	int carsPerExperiment = strtol(argv[3], &pEnd, 10); 
-	
+	int carsPerExperiment = strtol(argv[3], &pEnd, 10);
+
 	// Set the random seed using the current time.
 	srand(time(NULL));
-	
+
 	// These are the experiments available. You can add your own for testing.
 	typedef void(*SimFunction)(int);
 	SimFunction sim = NULL;
@@ -34,16 +34,17 @@ int main(int argc, char** argv)
 		sim = simulateStopSign;
 	}
 	if (strcmp(simulationName, "light") == 0) {
-		sim = simulateTrafficLight;	
+		sim = simulateTrafficLight;
 	}
-	
+
 	if (sim != NULL) {
-		for (int i = 0; i < experimentCount; i++) {
+    int i;
+		for (i = 0; i < experimentCount; i++) {
 			sim(carsPerExperiment);
 		}
-		printf("Simulation complete!\n"); 
+		printf("Simulation complete!\n");
 	} else {
-		fprintf(stderr, "Simulation not recognized: %s\n", simulationName);	
+		fprintf(stderr, "Simulation not recognized: %s\n", simulationName);
 	}
 
 }
