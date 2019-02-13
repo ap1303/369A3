@@ -1,6 +1,8 @@
 #include "stopSign.h"
 #include "car.h"
 #include "intersection.h"
+#include "syncDestroy.h"
+#include "common.h"
 
 EntryLane* enterStopSign(Car* car, StopSign* sign, pthread_mutex_t* enter_update, int* entered, int* enter_count);
 

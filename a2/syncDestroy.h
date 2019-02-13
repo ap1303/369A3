@@ -10,3 +10,5 @@
 void destroyMutex(pthread_mutex_t* mutex);
 
 void destroyConditionVariable(pthread_cond_t* cond);
+
+void lock(pthread_mutex_t* mutex);

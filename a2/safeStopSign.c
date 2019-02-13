@@ -5,27 +5,57 @@
 * submission code.
 */
 #include "safeStopSign.h"
+#include "syncDestroy.h"
+#include "stopSignModular.h"
+
+pthread_mutex_t quad_locks[4];
+pthread_mutex_t exit_lock;
+pthread_cond_t cleared_for_exit;
+pthread_mutex_t enter_update;
+int entered[1000];
+int enter_count;
+int exit_count;
 
 void initSafeStopSign(SafeStopSign* sign, int count) {
 	initStopSign(&sign->base, count);
 
-	// TODO: Add any initialization logic you need.
+	for(int w = 0; w < 4; w++) {
+		initMutex(&(quad_locks[w]));
+	}
+
+  initMutex(&exit_lock);
+
+	for(int z = 0; z < 1000; z++) {
+		entered[z] = 0;
+	}
+
+	initConditionVariable(&cleared_for_exit);
+
+	initMutex(&enter_update);
+
+  enter_count = 0;
+	exit_count = 0;
 }
 
 void destroySafeStopSign(SafeStopSign* sign) {
 	destroyStopSign(&sign->base);
 
-	// TODO: Add any logic you need to clean up data structures.
+	for(int w = 0; w < 4; w++) {
+		destroyMutex(&(quad_locks[w]));
+	}
+
+	destroyMutex(&exit_lock);
+
+	destroyMutex(&enter_update);
+
+	destroyConditionVariable(&cleared_for_exit);
 }
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
 
-	// TODO: Add your synchronization logic to this function.
+	EntryLane* lane = enterStopSign(car, &sign->base, &enter_update, entered, &enter_count);
 
-	EntryLane* lane = getLane(car, &sign->base);
-	enterLane(car, lane);
+	act(car, quad_locks, &sign->base);
 
-	goThroughStopSign(car, &sign->base);
-
-	exitIntersection(car, lane);
+	exitStopSign(car, lane, &exit_lock, &cleared_for_exit, &exit_count, entered);
 }
