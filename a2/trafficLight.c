@@ -22,9 +22,9 @@ void initTrafficLight(TrafficLight* light, int eastWest, int northSouth) {
 	}
 
 	initMutex(&light->validationLock);
-	
-	// Since the light transitions based on the number of cars that pass 
-	// through it, a deadlock will happen if the light expects more 
+
+	// Since the light transitions based on the number of cars that pass
+	// through it, a deadlock will happen if the light expects more
 	// east-west or more north-south cars to pass than are actually left in
 	// the simulation.
 	light->totalEWLeft = eastWest;
@@ -52,9 +52,9 @@ void initTrafficLight(TrafficLight* light, int eastWest, int northSouth) {
 		// Should be at least one car!
 		assert(FALSE);
 	}
-	
+
 	for (int i = 0; i < DIRECTION_COUNT; i++) {
-		light->straightCounts[i] = 0;	
+		light->straightCounts[i] = 0;
 	}
 }
 
@@ -67,7 +67,7 @@ void destroyTrafficLight(TrafficLight* light) {
 	}
 
 	pthread_mutex_destroy(&light->validationLock);
-	
+
 	free(light->tokens);
 }
 
@@ -89,18 +89,18 @@ void enterTrafficLight(Car* car, TrafficLight* intersection) {
 		// Validate that the light is green for the car.
 		if ((car->position == EAST || car->position == WEST) &&
 				intersection->currentMode != EAST_WEST) {
-			fprintf(stderr, "Car from east or west attempted to enter intersection "\
-				"not in east-west mode."\
-				"@ " __FILE__ " : " LINE_STRING "\n");
+			fprintf(stderr, "%d Car from east or west attempted to enter intersection "\
+				"not in east-west mode. (%d)"\
+				"@ " __FILE__ " : " LINE_STRING "\n", car->index, intersection->currentMode);
 
 			// Important that we release the lock before we return.
 			unlock(&intersection->validationLock);
 			return;
 		} else if ((car->position == NORTH || car->position == SOUTH) &&
 				intersection->currentMode != NORTH_SOUTH) {
-			fprintf(stderr, "Car from north or south attempted to enter intersection "\
-					"not in north-south mode."\
-					"@ " __FILE__ " : " LINE_STRING "\n");
+			fprintf(stderr, "%d Car from north or south attempted to enter intersection "\
+					"not in north-south mode. (%d)"\
+					"@ " __FILE__ " : " LINE_STRING "\n", car->index, intersection->currentMode);
 			unlock(&intersection->validationLock);
 			return;
 		}
@@ -200,8 +200,9 @@ void actTrafficLight(Car* car, TrafficLight* intersection,
 	// of cars still in the intersection and that need to clear it before
 	// the traffic light lets the next direction go.
 	intersection->carsInside--;
+	printf("after %d acted, carsInside turned to: %d\n", car->index, intersection->carsInside);
 	assert(intersection->carsInside >= 0);
-	
+
 	// When this is red (for both sides) and there are no cars inside, we
 	// transition back to green for one of the directions.
 	if (intersection->carsInside == 0 && intersection->currentMode == RED) {
@@ -215,8 +216,8 @@ void actTrafficLight(Car* car, TrafficLight* intersection,
 		int directionCarsLeft = intersection->currentMode == EAST_WEST ?
 				intersection->totalEWLeft :
 				intersection->totalNSLeft;
-		
-		// Turn on again for the old direction if no cars are waiting for 
+
+		// Turn on again for the old direction if no cars are waiting for
 		// the new one.
 		if (directionCarsLeft == 0) {
 			intersection->currentMode = getOppositeDirection(
