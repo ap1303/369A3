@@ -12,6 +12,7 @@ pthread_mutex_t quad_locks[4];
 pthread_mutex_t exit_lock;
 pthread_cond_t cleared_for_exit;
 pthread_mutex_t enter_update;
+pthread_mutex_t carsInsideLock;
 int entered[1000];
 int enter_count;
 int exit_count;

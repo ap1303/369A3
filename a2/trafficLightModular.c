@@ -1,6 +1,6 @@
 #include "trafficLightModular.h"
 
-EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread_cond_t* enter_condition, Car* car, TrafficLight* light, int* entered_light, int* enter_count_light) {
+EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread_cond_t* enter_condition, pthread_mutex_t* carsInsideLock, Car* car, TrafficLight* light, int* entered_light, int* enter_count_light) {
   lock(enter_update_light);
 
   while (((car->position == EAST || car->position == WEST) && getLightState(light) != EAST_WEST) ||
@@ -16,14 +16,20 @@ EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread
 
   //printf("%d just entered. Up until now, entered cars: %d with light state: %d with car position %d, car action %d and thus lane %d\n", car->index, *enter_count_light, getLightState(light), car->position, car->action, getLaneIndexLight(car));
 
+  lock(carsInsideLock);
+
   enterTrafficLight(car, light);
 
+  unlock(carsInsideLock);
+
   unlock(enter_update_light);
+
+
 
   return lane;
 }
 
-void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_condition, Car* car, TrafficLight* light) {
+void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_condition, pthread_mutex_t* carsInsideLock, Car* car, TrafficLight* light) {
   lock(act_mutex);
 
 	while(car->action == 2 && getStraightCount(light, (int) getOppositePosition(car->position)) != 0) {
@@ -31,7 +37,11 @@ void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_cond
 		pthread_cond_wait(act_condition, act_mutex);
 	}
 
-	actTrafficLight(car, light, NULL, NULL, NULL);
+  lock(carsInsideLock);
+
+  actTrafficLight(car, light, NULL, NULL, NULL);
+
+  unlock(carsInsideLock);
 
 	unlock(act_mutex);
 
