@@ -17,9 +17,9 @@ void destroyConditionVariable(pthread_cond_t* cond) {
 }
 
 void lock(pthread_mutex_t* mutex) {
-  int returnValue = pthread_mutex_unlock(mutex);
+  int returnValue = pthread_mutex_lock(mutex);
   if (returnValue != 0) {
-    perror("Mutex unlock failed."
+    perror("Mutex lock failed."
         "@ " __FILE__ " : " LINE_STRING "\n");
   }
 }
