@@ -14,7 +14,7 @@ EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread
   entered_light[*enter_count_light] = car->index;
   *enter_count_light += 1;
 
-  printf("%d just entered. Up until now, entered cars: %d with light state: %d with car position %d, car action %d and thus lane %d\n", car->index, *enter_count_light, getLightState(light), car->position, car->action, getLaneIndexLight(car));
+  //printf("%d just entered. Up until now, entered cars: %d with light state: %d with car position %d, car action %d and thus lane %d\n", car->index, *enter_count_light, getLightState(light), car->position, car->action, getLaneIndexLight(car));
 
   enterTrafficLight(car, light);
 
