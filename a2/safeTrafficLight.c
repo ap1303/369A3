@@ -61,12 +61,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	//printf("after %d entered, light state turned to: %d\n", car->index, getLightState(&light->base));
 
-	actTrafficLightWrapper(&act_mutex, &act_condition, &carsInsideLock, car, &light->base);
-
-  if (getLightState(&light->base) != RED) {
-		//printf("release enter cond variable on %d\n", car->index);
-		pthread_cond_broadcast(&enter_condition);
-	}
+	actTrafficLightWrapper(&act_mutex, &act_condition, &carsInsideLock, &enter_condition, car, &light->base);
 
   exitTrafficLight(&exit_lock_light, &cleared_for_exit_light, lane, car, &exit_count_light, entered_light);
 

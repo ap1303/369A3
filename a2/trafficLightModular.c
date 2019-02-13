@@ -29,7 +29,7 @@ EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread
   return lane;
 }
 
-void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_condition, pthread_mutex_t* carsInsideLock, Car* car, TrafficLight* light) {
+void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_condition, pthread_mutex_t* carsInsideLock, pthread_cond_t* enter_condition, Car* car, TrafficLight* light) {
   lock(act_mutex);
 
 	while(car->action == 2 && getStraightCount(light, (int) getOppositePosition(car->position)) != 0) {
@@ -53,6 +53,15 @@ void actTrafficLightWrapper(pthread_mutex_t* act_mutex, pthread_cond_t* act_cond
 	}
 
   unlock(act_mutex);
+
+  lock(carsInsideLock);
+
+  if (getLightState(light) != RED) {
+		//printf("release enter cond variable on %d\n", car->index);
+		pthread_cond_broadcast(enter_condition);
+	}
+
+  unlock(carsInsideLock);
 }
 
 void exitTrafficLight(pthread_mutex_t* exit_lock_light, pthread_cond_t* cleared_for_exit_light, EntryLane* lane, Car* car, int* exit_count_light, int* entered_light) {
