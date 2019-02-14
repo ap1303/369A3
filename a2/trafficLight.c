@@ -200,7 +200,7 @@ void actTrafficLight(Car* car, TrafficLight* intersection,
 	// of cars still in the intersection and that need to clear it before
 	// the traffic light lets the next direction go.
 	intersection->carsInside--;
-	printf("after %d acted, carsInside turned to: %d\n", car->index, intersection->carsInside);
+	//printf("after %d acted, carsInside turned to: %d\n", car->index, intersection->carsInside);
 	assert(intersection->carsInside >= 0);
 
 	// When this is red (for both sides) and there are no cars inside, we
