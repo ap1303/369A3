@@ -48,8 +48,6 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 
 	destroyMutex(&enter_update_light);
 	destroyConditionVariable(&enter_condition);
-
-	destroyMutex(&carsInsideLock);
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
