@@ -13,7 +13,6 @@ pthread_mutex_t act_mutex;
 pthread_cond_t act_condition;
 pthread_mutex_t exit_lock_light;
 pthread_cond_t cleared_for_exit_light;
-pthread_mutex_t carsInsideLock;
 int entered_light[1000];
 int enter_count_light;
 int exit_count_light;
@@ -29,8 +28,6 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 
 	initMutex(&enter_update_light);
 	initConditionVariable(&enter_condition);
-
-	initMutex(&carsInsideLock);
 
 	for(int z = 0; z < 1000; z++) {
 		entered_light[z] = 0;
@@ -57,7 +54,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
-	EntryLane* lane = enterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base, entered_light, &enter_count_light);
+	EntryLane* lane = nterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base, entered_light, &enter_count_light);
 
 	actTrafficLightWrapper(&act_mutex, &act_condition, car, &light->base);
 
