@@ -57,72 +57,28 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
-	enterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base);
+	EntryLane* lane = enterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base, entered_light, &enter_count_light);
 
-	printf("%d released from initial blocked entry\n", car->index);
+	actTrafficLightWrapper(&act_mutex, &act_condition, car, &light->base);
 
-	checkForAction(&act_mutex, &act_condition, &enter_condition, car, &light->base);
-
-	printf("%d released from initial blocked action\n", car->index);
-
-	lock(&carsInsideLock);
-
-	int blockedInside = 0;
-
-	printf("%d holds the update lock now\n", car->index);
-
-	printf("checking entry inside update section for %d\n", car->index);
-
-  while (((car->position == EAST || car->position == WEST) && getLightState(&light->base) != EAST_WEST) ||
-  ((car->position == NORTH || car->position == SOUTH) && getLightState(&light->base) != NORTH_SOUTH)) {
-		blockedInside = 1;
-		unlock(&carsInsideLock);
-		printf("%d blocked for entry inside update section, %d\n", car->index, car->position);
-		pthread_cond_wait(&enter_condition, &enter_update_light);
-	}
-
-  printf("%d not blocked for entry inside update section, blockedInside is: %d\n", car->index, blockedInside);
-
-  if(blockedInside == 1) {
-	  lock(&carsInsideLock);
-		printf("lock reacquired after blocking inside for %d\n", car->index);
-	}
-
-	EntryLane* lane = getLaneLight(car, &light->base);
-  enterLane(car, lane);
-
-  entered_light[enter_count_light] = car->index;
-  enter_count_light += 1;
-
-  enterTrafficLight(car, &light->base);
-
-	printf("after %d entered, light state turned to: %d\n", car->index, getLightState(&light->base));
+	lock(&enter_update_light);
 
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
-	printf("after %d acted, light state turned to: %d\n", car->index, getLightState(&light->base));
+  int newLightState = getLightState(&light->base);
 
-  if (car->action == 0) {
-		pthread_cond_broadcast(&act_condition);
-		printf("release action cond variable on %d\n", car->index);
-	}
-
-	if (getLightState(&light->base) != RED) {
+  if (newLightState != RED) {
+		//printf("release enter cond variable on %d inside act, light state turned to: %d\n", car->index, newLightState);
 		pthread_cond_broadcast(&enter_condition);
-		printf("release enter cond variable on %d\n", car->index);
 	}
 
-  printf("%d is about to release the update lock now\n", car->index);
+	if (car->action == 0) {
+		pthread_cond_broadcast(&act_condition);
+		//printf("release action cond variable on %d\n", car->index);
+	}
 
-  unlock(&carsInsideLock);
+  unlock(&enter_update_light);
 
-	exitTrafficLight(&exit_lock_light, &cleared_for_exit_light, lane, car, &exit_count_light, entered_light);
-
-
-
-
-
-
-
+  exitTrafficLight(&exit_lock_light, &cleared_for_exit_light, lane, car, &exit_count_light, entered_light);
 
 }
