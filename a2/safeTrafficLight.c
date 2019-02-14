@@ -52,7 +52,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
-	EntryLane* lane = nterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base, entered_light, &enter_count_light);
+	EntryLane* lane = enterTrafficLightWrapper(&enter_update_light, &enter_condition, car, &light->base, entered_light, &enter_count_light);
 
 	actTrafficLightWrapper(&act_mutex, &act_condition, car, &light->base);
 
