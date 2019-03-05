@@ -9,6 +9,8 @@ EntryLane* enterTrafficLightWrapper(pthread_mutex_t* enter_update_light, pthread
     pthread_cond_wait(enter_condition, enter_update_light);
   }
 
+
+
 	EntryLane* lane = getLaneLight(car, light);
   enterLane(car, lane);
 
