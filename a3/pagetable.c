@@ -157,17 +157,17 @@ char *find_physpage(addr_t vaddr, char type) {
 		pgdir[idx] = init_second_level();
 	}
 	uintptr_t pde = pgdir[idx].pde;
-	pgtbl_entry_t *pgtbl = (pgtbl_entry_t *) (pde & PAGE_MASK)
+	pgtbl_entry_t *pgtbl = (pgtbl_entry_t *) (pde & PAGE_MASK);
 
 
 	// Use vaddr to get index into 2nd-level page table and initialize 'p'
   unsigned int table_index = PGTBL_INDEX(vaddr);
-	p = &(pgtbl[table_index]);
+	p = pgtbl + table_index;
 
 
 	// Check if p is valid or not, on swap or not, and handle appropriately
 	unsigned int frame = p->frame;
-	if (frame & PG_VALID == 0) {
+	if ((frame & PG_VALID) == 0) {
 		if (frame & PG_ONSWAP) {
       int frame = allocate_frame(p);
 			int status = swap_pagein(frame, p->swap_off);
